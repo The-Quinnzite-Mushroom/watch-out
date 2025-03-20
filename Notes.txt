@@ -20,3 +20,6 @@ Need more wires
 Sleep mode:
 measure temperature
 grey text on website? grey and blue mode
+
+
+march 31st final presentation
