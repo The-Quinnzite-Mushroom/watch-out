@@ -1,0 +1,8 @@
+
+To do:
+
+change text colour
+IR sensors
+add degree symbol
+
+Notes:
