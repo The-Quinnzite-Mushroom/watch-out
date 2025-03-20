@@ -25,21 +25,28 @@ def get_tempSensorValue():
 # The below equation gives temperature in degree Celcius. Adjust the value 10 in the denominator to calibrate the sensor reading. 
     tempValue = round(((((1/(1/298+(1/3960)*math.log((65535/(tempSensorValue)-1)))) - 273)*10)/7.5),1)
     return str(tempValue)
-def web_page2(tempValue):
+def web_page2(tempValue,colour):
     html = f""" 
     <!DOCTYPE html>
     <html>
     <head>
         <style>
             body {{ font-family: Arial, sans-serif; text-align: center; padding: 200px; }}
-            #temp {{ font-size: 200px; font-weight: bold; color: green; }} /* Bigger and bolder */
+            #temp {{
+                font-size: 200px;
+                font-weight: bold;
+                color: {colour};  /* Set initial color based on current status */
+            }}
         </style>
         <script>
             function updateTemp() {{
                 fetch('/temp')  // Request the latest temperature value
                 .then(response => response.text())  // Convert response to text
                 .then(data => {{
-                    document.getElementById("temp").innerText = data + "C";  // Update temperature display
+                    const [temp, color] = data.split(",");  // Receive both temp and color
+                    const tempElement = document.getElementById("temp");
+                    tempElement.innerText = temp + " C";  // Update temperature display
+                    tempElement.style.color = color;  // Update color based on the temperature status
                 }});
             }}
 
@@ -131,7 +138,7 @@ while True:
         else:
             colour = "green"
         
-        response = f"{tempValue}"
+        response = f"{tempValue},{colour}"
         conn.send("HTTP/1.1 200 OK\n")
         conn.send("Content-Type: text/plain\n")
         conn.send("Connection: close\n\n")
@@ -140,7 +147,7 @@ while True:
     else:
         # Send the full HTML page
         tempValue = get_tempSensorValue()
-        response = web_page2(tempValue)
+        response = web_page2(tempValue,colour)
         conn.send("HTTP/1.1 200 OK\n")
         conn.send("Content-Type: text/html\n")
         conn.send("Connection: close\n\n")

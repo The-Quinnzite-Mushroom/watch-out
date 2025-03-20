@@ -1,8 +1,22 @@
 
 To do:
 
-change text colour
 IR sensors
+Grey out mode
 add degree symbol
+Tweek box input
+Testing
+
 
 Notes:
+Black - receiver
+Blue - emitter
+Anode - tall leg
+Cathode - short
+100ohm resistor each
+Need more wires
+
+
+Sleep mode:
+measure temperature
+grey text on website? grey and blue mode
