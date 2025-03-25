@@ -39,6 +39,7 @@ def web_page2(tempValue,colour):
                 font-size: 200px;
                 font-weight: bold;
                 filter: brightness(100%);
+                
                 color: {colour};  /* Set initial color based on current status */
             }}
             
@@ -48,10 +49,11 @@ def web_page2(tempValue,colour):
                 fetch('/temp')  // Request the latest temperature value
                 .then(response => response.text())  // Convert response to text
                 .then(data => {{
-                    const [temp, color] = data.split(",");  // Receive both temp and color
+                    const [temp, color,bg_color] = data.split(",");  // Receive temp, colour,bg_color
                     const tempElement = document.getElementById("temp");
                     tempElement.innerText = temp + " C";  // Update temperature display
                     tempElement.style.color = color;  // Update color based on the temperature status
+                    document.body.style.backgroundColor = bg_color;
                 }});
             }}
 
@@ -109,6 +111,11 @@ dim_mode = False
 ir_reading_1 = 0
 ir_reading_2 = 0
 
+ir_threshold = 63000
+sensing_ir = False
+is_dim = False
+bg_colour = "white"
+
 
 while True:
     conn, addr = s.accept()
@@ -118,11 +125,24 @@ while True:
     
     #v2 = ir_reciever2.read_u16()
     utime.sleep(1)
-    v1 = ir_reciever1.read_u16()
-    print(v1)#,v2)
+    light_reading = ir_reciever1.read_u16()
+    print(light_reading)
+    print("Is Dim:",is_dim)
+    print(bg_colour)
     
-    if(ir_reading_1 > 10 and ir_reading_2 > 10):
-        pass
+    #Dim only gets toggled when there stops being light
+    if (sensing_ir == False):
+        if(light_reading > ir_threshold):
+            sensing_ir = True
+            print("dim toggled")
+            if is_dim:
+                is_dim = False
+                bg_colour = "white"
+            else:
+                is_dim = True
+                bg_colour ="grey"
+    elif(light_reading < ir_threshold):
+        sensing_ir = False
     
     if colour == "green" or colour == "blue":
         green_led.value(1)
@@ -157,7 +177,7 @@ while True:
         else:
             colour = "green"
         
-        response = f"{tempValue},{colour}"
+        response = f"{tempValue},{colour},{bg_colour}"
         conn.send("HTTP/1.1 200 OK\n")
         conn.send("Content-Type: text/plain\n")
         conn.send("Connection: close\n\n")
