@@ -13,7 +13,10 @@ import math # library to perform mathematical operations
 #led = machine.Pin(14, machine.Pin.OUT)
 
 # Configure ADC(1), which is GP27, as ADC channel and call it as temp_sensor
-temp_sensor = machine.ADC(1)
+temp_sensor = machine.ADC(0)
+ir_reciever1 = machine.ADC(1)
+ir_reciever2 = machine.ADC(2)
+
 
 red_led = machine.Pin(15, machine.Pin.OUT)
 green_led = machine.Pin(14, machine.Pin.OUT)
@@ -35,8 +38,10 @@ def web_page2(tempValue,colour):
             #temp {{
                 font-size: 200px;
                 font-weight: bold;
+                filter: brightness(100%);
                 color: {colour};  /* Set initial color based on current status */
             }}
+            
         </style>
         <script>
             function updateTemp() {{
@@ -99,13 +104,27 @@ minimum = 26
 maximum = 34
 
 colour = "green"
+
+dim_mode = False
+ir_reading_1 = 0
+ir_reading_2 = 0
+
+
 while True:
     conn, addr = s.accept()
     request = conn.recv(1024).decode()  # Decode the request
     
-    utime.sleep
     
-    if colour == "green":
+    
+    #v2 = ir_reciever2.read_u16()
+    utime.sleep(1)
+    v1 = ir_reciever1.read_u16()
+    print(v1)#,v2)
+    
+    if(ir_reading_1 > 10 and ir_reading_2 > 10):
+        pass
+    
+    if colour == "green" or colour == "blue":
         green_led.value(1)
         red_led.value(0)
     else:
@@ -154,5 +173,6 @@ while True:
         conn.sendall(response)
 
     conn.close()
+
 
 
