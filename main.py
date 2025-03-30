@@ -14,8 +14,7 @@ import math # library to perform mathematical operations
 
 # Configure ADC(1), which is GP27, as ADC channel and call it as temp_sensor
 temp_sensor = machine.ADC(0)
-ir_reciever1 = machine.ADC(1)
-ir_reciever2 = machine.ADC(2)
+light_reciever = machine.ADC(1)
 
 
 red_led = machine.Pin(15, machine.Pin.OUT)
@@ -108,43 +107,53 @@ maximum = 34
 colour = "green"
 
 dim_mode = False
-ir_reading_1 = 0
-ir_reading_2 = 0
 
-ir_threshold = 63000
-sensing_ir = False
+light_threshold = 63000
+sensing_light = False
 is_dim = False
-bg_colour = "white"
 
 
+GREEN_NORMAL = "green"
+RED_NORMAL = "red"
+GREEN_DIM = "seagreen"
+RED_DIM = "firebrick"
+BG_DIM = "lightgray"
+BG_NORMAL = "white"
+bg_colour = BG_NORMAL
+
+time = 0
+light_reading = 0
+tempValue = 0
 while True:
     conn, addr = s.accept()
     request = conn.recv(1024).decode()  # Decode the request
     
     
-    
-    #v2 = ir_reciever2.read_u16()
+    time+=1
     utime.sleep(1)
-    light_reading = ir_reciever1.read_u16()
-    print(light_reading)
+    light_reading = light_reciever.read_u16()
+    print(f"\n----Time = {time}s----")
     print("Is Dim:",is_dim)
-    print(bg_colour)
+    print(f"Temp: {tempValue}C")
+    print(f"Range: {minimum}C - {maximum}C")
+    print(f"Colour: {colour}")
+    
     
     #Dim only gets toggled when there stops being light
-    if (sensing_ir == False):
-        if(light_reading > ir_threshold):
-            sensing_ir = True
+    if (sensing_light == False):
+        if(light_reading > light_threshold):
+            sensing_light = True
             print("dim toggled")
             if is_dim:
                 is_dim = False
-                bg_colour = "white"
+                bg_colour = BG_NORMAL
             else:
                 is_dim = True
-                bg_colour ="grey"
-    elif(light_reading < ir_threshold):
-        sensing_ir = False
+                bg_colour = BG_DIM
+    elif(light_reading < light_threshold):
+        sensing_light = False
     
-    if colour == "green" or colour == "blue":
+    if  colour == "green":
         green_led.value(1)
         red_led.value(0)
     else:
@@ -167,17 +176,26 @@ while True:
             maximum = float(value2);
         except:
             print("incorrect max value")
-    
+    tempValue = get_tempSensorValue()
+
+    #detect green and red use for led and user interface
+    if (float(tempValue) < minimum or float(tempValue)> maximum):
+        colour = "red"
+    else:
+        colour = "green"
     if "GET /temp" in request:#html script runs this once a second
-        tempValue = get_tempSensorValue()
-        print("tempValue",tempValue)
-        #detect green and red use for led and user interface
-        if (float(tempValue) < minimum or float(tempValue)> maximum):
-            colour = "red"
-        else:
-            colour = "green"
         
-        response = f"{tempValue},{colour},{bg_colour}"
+        
+        if is_dim:
+            if colour == "green":
+                response = f"{tempValue},{GREEN_DIM},{bg_colour}"
+            else:
+                response = f"{tempValue},{RED_DIM},{bg_colour}"
+        else:
+            if colour == "green":
+                response = f"{tempValue},{GREEN_NORMAL},{bg_colour}"
+            else:
+                response = f"{tempValue},{RED_NORMAL},{bg_colour}"
         conn.send("HTTP/1.1 200 OK\n")
         conn.send("Content-Type: text/plain\n")
         conn.send("Connection: close\n\n")

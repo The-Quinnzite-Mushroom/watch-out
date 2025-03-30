@@ -1,11 +1,17 @@
 
 To do:
 
-IR sensors
-Grey out mode
+
+"who did what"
+
+Dim letters
 add degree symbol
-Tweek box input
-Testing
+Clean up code 
+meet 
+
+Meeting to prep for final presentation
+
+march 31st final presentation
 
 
 Notes:
@@ -14,12 +20,14 @@ Blue - emitter
 Anode - tall leg
 Cathode - short
 100ohm resistor each
-Need more wires
 
 
 Sleep mode:
 measure temperature
 grey text on website? grey and blue mode
 
+1052 no power 
+with 100ohm resistance all
+528 when going back
 
-march 31st final presentation
+
